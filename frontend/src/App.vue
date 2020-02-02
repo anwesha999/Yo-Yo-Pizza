@@ -1,16 +1,17 @@
 <template>
   <div id="app">
-    <Chat/>
+    <chatComponentVue/>
   </div>
 </template>
 
 <script>
-import Chat from './components/Chat'
+// import Chat from './components/Chat'
+import chatComponentVue from './components/chatComponent.vue'
 
 export default {
   name: 'App',
   components: {
-    Chat
+    chatComponentVue
   }
 }
 </script>
