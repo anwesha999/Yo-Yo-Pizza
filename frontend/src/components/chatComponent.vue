@@ -40,7 +40,7 @@ export default {
             },
             messages: [
                 {
-                    content: 'Hello, I am Mona, Mona Darling',
+                    content: 'Hello, I am Mona!',
                     myself: false,
                     participantId: 1,
                     timestamp: moment()
@@ -95,10 +95,37 @@ export default {
             ],
             scrollBottom: {
                 messageSent: true,
-                messageReceived: false
+                messageReceived: true
             },
             displayHeader:true,
-            currentState:"start"
+            nextState:"showMenu",
+            requestData: {
+                name:null,
+                pizzaVariety:null,
+                amount:null,
+                address:null,
+                phoneNumber:null,
+                placedAt:null
+            },
+            menu:{
+                1:{
+                    name:"Margereta",
+                    price:100
+                },
+                2:{
+                    name:"Farmhouse",
+                    price:125
+                },
+                3:{
+                    name:"Corn and Cheeze",
+                    price:125
+                },
+                4:{
+                    name:"5-Layer Cheeze Burst",
+                    price:150
+                }
+            },
+            incorrectResponse:'Your Response was not recognized please responsond correctly.'
         }
     },
     methods: {
@@ -119,10 +146,11 @@ export default {
             * It's important to notice that even when your message wasn't send 
             * yet to the server you have to add the message into the array
             */
-            this.processUserResponse(message.content)
-            console.log(message.content)
 
             this.messages.push(message);
+
+            
+            this.processUserResponse(message.content)
 
             /*
             * you can update message state after the server response
@@ -136,57 +164,107 @@ export default {
             this.visible = false;
         },
         processUserResponse:function(message){
-            switch(this.currentState){
-                case "start"    : 
-                    console.log("start")
+            message = message.trim()
+            switch(this.nextState){
+                case "showMenu"    : 
                     if (message == 1){
-                        this.currentState="pizza-selection"
+                        var msg = 'Please select a Pizza  \n\n1. Margereta \n\n2.Farmhouse \n\n3.Corn and Cheeze \n\n4. 5-Layer Cheeze Burst'
+                        this.sendMessage(msg)
+                        this.nextState="pizzaSelected"
                     }
                     else if (message == 2){
-                        this.currentState="orderStatus"
+                        this.nextState="orderStatus"
                     }
                     else{
-                        this.notAppropriateResponse()
+                        this.sendMessage(this.incorrectResponse)
                     }
                     break;
-                case "pizza-selection" :
-                    console.log("pizza-selection")
+                case "pizzaSelected" :
+                    if(this.menu[message] !== undefined){
+                        var obj = this.menu[message]
+                        this.requestData.pizzaVariety = obj.name
+                        this.requestData.amount = obj.price
+                        var msg = "You have selected "+obj.name+" which cost "+obj.price
+                        this.sendMessage(msg)
+                        this.sendMessage("Please tell me you name.")
+                        this.nextState="user-name"
+                    }
+                    else{
+                        this.sendMessage(this.incorrectResponse)
+                    }
+                    break;
+                case "user-name":
+                    this.myself.name = message
+                    this.requestData.name = message
+                    var msg = "Nice to meet you " + message 
+                    this.sendMessage(msg)
+                    this.sendMessage("Please tell me your mobile number.")
+                    this.nextState = "user-mobile"
+                    break;
+                case "user-mobile":
+                    this.requestData.phoneNumber = message
+                    this.sendMessage("Thank You for providing your mobile number.")
+                    this.sendMessage("Please tell me where we need to deliver pizza.")
+                    this.sendMessage("What is your address?")
+                    this.nextState = "user-address"
+                    break;
+                case "user-address":
+                    this.requestData.address = message
+                    this.requestData.placedAt = moment().unix()
+                    var msg = [
+                        "Thank you for provinding your address.",
+                        "We will be delivering your pizza within 30 mins.",
+                        "Your Order ID is XXXXXXX",
+                        "Please keep it for further refrence."
+                    ]
+                    msg.forEach(element => {
+                        this.sendMessage(element)
+                    });
+                    console.log(this.requestData)
+                    this.nextState = "finish"
+                    break;
+                case "finish":
+                    this.sendMessage("You order will be delivered shortly.")
                     break;
                 default:
-
+                    pass
             }
-            this.sendUserMessage()
         },
-        notAppropriateResponse:function(){
+        sendMessage(msg){
             var message = {
-                        content: 'Your Response was not recognized please responsond correctly.',
+                        content: msg,
                         myself: false,
                         participantId: 1,
                         timestamp: moment()
                     }
-            // this.toLoad.push(message)
             this.messages.push(message)
-        },
-        sendUserMessage:function(){
-            switch(this.currentState){
-                case "pizza-selection":
-                    var message = {
-                                content: 'Please select a Pizza  \n\n1. Margereta \n\n2.Farmhouse \n\n3.Corn and Cheeze \n\n4. 5-Layer Cheeze Burst',
-                                myself: false,
-                                participantId: 1,
-                                timestamp: moment()
-                            }
-                    // this.toLoad.push(message)
-                    this.messages.push(message)
-                default:
-                    console.log("Reached Default case")
-            }
         }
+        // sendUserMessage:function(obj){
+        //     switch(this.nextState){
+        //         case "showMenu":
+        //             var message = {
+        //                         content: ,
+        //                         myself: false,
+        //                         participantId: 1,
+        //                         timestamp: moment()
+        //                     }
+        //             this.messages.push(message)
+        //         case "pizzaSelected":
+        //             var message = {
+        //                         content: "You have selected "+obj.name+" which cost "+obj.price,
+        //                         myself: false,
+        //                         participantId: 1,
+        //                         timestamp: moment()
+        //                     }
+        //         default:
+        //             console.log("Reached Default case")
+        //     }
+        // }
     }
 }
 </script>
 <style scoped>
 #chat-container{
-    height:98vh;
+    height:96vh;
 }
 </style>
