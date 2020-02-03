@@ -97,7 +97,8 @@ export default {
                 messageSent: true,
                 messageReceived: false
             },
-            displayHeader:true
+            displayHeader:true,
+            currentState:"start"
         }
     },
     methods: {
@@ -118,6 +119,8 @@ export default {
             * It's important to notice that even when your message wasn't send 
             * yet to the server you have to add the message into the array
             */
+            this.processUserResponse(message.content)
+            console.log(message.content)
 
             this.messages.push(message);
 
@@ -131,6 +134,53 @@ export default {
         },
         onClose() {
             this.visible = false;
+        },
+        processUserResponse:function(message){
+            switch(this.currentState){
+                case "start"    : 
+                    console.log("start")
+                    if (message == 1){
+                        this.currentState="pizza-selection"
+                    }
+                    else if (message == 2){
+                        this.currentState="orderStatus"
+                    }
+                    else{
+                        this.notAppropriateResponse()
+                    }
+                    break;
+                case "pizza-selection" :
+                    console.log("pizza-selection")
+                    break;
+                default:
+
+            }
+            this.sendUserMessage()
+        },
+        notAppropriateResponse:function(){
+            var message = {
+                        content: 'Your Response was not recognized please responsond correctly.',
+                        myself: false,
+                        participantId: 1,
+                        timestamp: moment()
+                    }
+            // this.toLoad.push(message)
+            this.messages.push(message)
+        },
+        sendUserMessage:function(){
+            switch(this.currentState){
+                case "pizza-selection":
+                    var message = {
+                                content: 'Please select a Pizza  \n\n1. Margereta \n\n2.Farmhouse \n\n3.Corn and Cheeze \n\n4. 5-Layer Cheeze Burst',
+                                myself: false,
+                                participantId: 1,
+                                timestamp: moment()
+                            }
+                    // this.toLoad.push(message)
+                    this.messages.push(message)
+                default:
+                    console.log("Reached Default case")
+            }
         }
     }
 }
