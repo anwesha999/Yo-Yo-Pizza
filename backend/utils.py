@@ -1,5 +1,13 @@
 import json
 import uuid
+import os
+
+def create_datafile():
+    data = {
+        "orders":{},
+        "users":{}
+    }
+    save_data(data)
 
 def load_data():
     with open('data.json') as json_file:
@@ -16,17 +24,21 @@ def save_data(obj):
         return False
 
 
-def add_new_user(obj):
+def update_user_info(obj):
     try:
         data = load_data()
 
-        data["users"][obj["phoneNumber"]] = {
-            "name" : obj["name"]
-        }
+        user_id = obj["phoneNumber"]
+
+        data["users"][user_id] = {}
+        
+        for key in obj.keys():
+            data["users"][user_id][str(key)] = obj[key] 
 
         save_data(data)
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 def add_new_order(obj):
@@ -38,8 +50,11 @@ def add_new_order(obj):
         unique_id = unique_id.upper()
 
         data["orders"][unique_id] = obj
-        
+
         save_data(data)
         return unique_id
-    except
+    except:
         return False
+
+if not "data.json" in os.listdir("./"):
+    create_datafile()

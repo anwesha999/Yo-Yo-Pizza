@@ -7,8 +7,22 @@ app = Flask(__name__)
 def place_order():
     try:
         process_obj = request.get_json()
-        print(process_obj["name"])
-        return 'Sucess'
+        if add_new_order(process_obj):
+            return "Sucess"
+        else:
+            return "Failed"
+    except Exception as e:
+        return e
+
+@app.route('/user_info',methods=["POST"]) 
+def user_info():
+    try:
+        process_obj = dict(request.get_json())
+
+        if update_user_info(process_obj):
+            return "Sucess"
+        else:
+            return "Failed"
     except Exception as e:
         return e
 
