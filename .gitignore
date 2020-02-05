@@ -6,6 +6,7 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
 backend/env/*
+backend/__pycache__
 
 .idea
 .vscode
