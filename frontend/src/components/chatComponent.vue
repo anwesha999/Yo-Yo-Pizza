@@ -20,6 +20,7 @@
 import {Chat} from 'vue-quick-chat';
 import 'vue-quick-chat/dist/vue-quick-chat.css';
 import moment from 'moment'
+import axios from "axios"
 
 export default {
     components: {
@@ -163,6 +164,17 @@ export default {
         onClose() {
             this.visible = false;
         },
+        saveUserToDB:function(){
+            axios({
+                method: 'post',
+                url: "http://127.0.0.1:5000/user_info",
+                data: this.requestData,
+                headers : {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin' : '*'
+                }
+            });
+        },
         processUserResponse:function(message){
             message = message.trim()
             switch(this.nextState){
@@ -207,6 +219,7 @@ export default {
                     this.sendMessage("Please tell me where we need to deliver pizza.")
                     this.sendMessage("What is your address?")
                     this.nextState = "user-address"
+                    this.saveUserToDB()
                     break;
                 case "user-address":
                     this.requestData.address = message
@@ -222,6 +235,7 @@ export default {
                     });
                     console.log(this.requestData)
                     this.nextState = "finish"
+                    this.saveUserToDB()
                     break;
                 case "finish":
                     this.sendMessage("You order will be delivered shortly.")
@@ -239,27 +253,6 @@ export default {
                     }
             this.messages.push(message)
         }
-        // sendUserMessage:function(obj){
-        //     switch(this.nextState){
-        //         case "showMenu":
-        //             var message = {
-        //                         content: ,
-        //                         myself: false,
-        //                         participantId: 1,
-        //                         timestamp: moment()
-        //                     }
-        //             this.messages.push(message)
-        //         case "pizzaSelected":
-        //             var message = {
-        //                         content: "You have selected "+obj.name+" which cost "+obj.price,
-        //                         myself: false,
-        //                         participantId: 1,
-        //                         timestamp: moment()
-        //                     }
-        //         default:
-        //             console.log("Reached Default case")
-        //     }
-        // }
     }
 }
 </script>
