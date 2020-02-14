@@ -11,8 +11,9 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 def place_order():
     try:
         process_obj = request.get_json()
-        if add_new_order(process_obj):
-            return "Sucess"
+        res = add_new_order(process_obj) 
+        if res:
+            return res
         else:
             return "Failed"
     except Exception as e:

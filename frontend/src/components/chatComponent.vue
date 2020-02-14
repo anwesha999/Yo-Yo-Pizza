@@ -126,7 +126,8 @@ export default {
                     price:150
                 }
             },
-            incorrectResponse:'Your Response was not recognized please responsond correctly.'
+            incorrectResponse:'Your Response was not recognized please responsond correctly.',
+            uid : ""
         }
     },
     methods: {
@@ -168,12 +169,36 @@ export default {
             axios({
                 method: 'post',
                 url: "http://127.0.0.1:5000/user_info",
-                data: this.requestData,
+                data: {
+                    name:this.requestData.name,
+                    address:this.requestData.address,
+                    phoneNumber:this.requestData.phoneNumber
+                },
                 headers : {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin' : '*'
                 }
             });
+        },
+        placeOrder : function(){
+            var req = axios({
+                method: 'post',
+                url: "http://127.0.0.1:5000/place_order",
+                data: {
+                    pizzaVariety:this.requestData.pizzaVariety,
+                    amount:this.requestData.amount,
+                    phoneNumber:this.requestData.phoneNumber,
+                    placedAt:this.requestData.placedAt
+                },
+                headers : {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin' : '*'
+                }
+            });
+            Promise.resolve(req).then(uid => {
+                this.uid = uid.data
+                this.processUserResponse("")
+            })
         },
         processUserResponse:function(message){
             message = message.trim()
@@ -224,20 +249,23 @@ export default {
                 case "user-address":
                     this.requestData.address = message
                     this.requestData.placedAt = moment().unix()
+                    this.saveUserToDB()
+                    this.placeOrder()
+                    this.nextState = "finish"
+                    break;
+                case "finish":
                     var msg = [
                         "Thank you for provinding your address.",
                         "We will be delivering your pizza within 30 mins.",
-                        "Your Order ID is XXXXXXX",
+                        "Your Order ID is "+this.uid,
                         "Please keep it for further refrence."
                     ]
                     msg.forEach(element => {
                         this.sendMessage(element)
                     });
-                    console.log(this.requestData)
-                    this.nextState = "finish"
-                    this.saveUserToDB()
-                    break;
-                case "finish":
+                    this.nextState = "end"
+                    break
+                case "end":
                     this.sendMessage("You order will be delivered shortly.")
                     break;
                 default:

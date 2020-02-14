@@ -12,6 +12,7 @@ def create_datafile():
 def load_data():
     with open('data.json') as json_file:
         data = json.load(json_file)
+        json_file.close()
         return data
 
 def save_data(obj):
