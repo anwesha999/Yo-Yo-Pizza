@@ -1,7 +1,7 @@
 # Yo Yo pizza ordering app
 
 
-### Starting the front-end
+### Starting the frontend
 
 ```
 cd frontend
@@ -9,9 +9,10 @@ npm install
 npm start
 ```
 
-### Staarting the backend
+### Starting the backend
 
 ```
+cd backend
 virtualenv env
 source enb/bin/activate
 pip install -r requirements.txt
