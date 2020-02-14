@@ -36,7 +36,9 @@ def user_info():
 @app.route('/get_order_status',methods=["POST"]) 
 @cross_origin()
 def get_order_status(): 
-    print("order status")
+    status = dict(request.get_json())
+    status = order_status(status["orderId"])
+    return status
 
 if __name__ == '__main__': 
     app.run(port=5000) 

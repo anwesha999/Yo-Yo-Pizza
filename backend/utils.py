@@ -1,6 +1,7 @@
 import json
 import uuid
 import os
+from datetime import datetime
 
 def create_datafile():
     data = {
@@ -10,16 +11,17 @@ def create_datafile():
     save_data(data)
 
 def load_data():
-    with open('data.json') as json_file:
-        data = json.load(json_file)
-        json_file.close()
-        return data
+    json_file = open('data.json')
+    data = json.load(json_file)
+    json_file.close()
+    return data
 
 def save_data(obj):
     try:
-        with open('data.json', 'w') as outfile:
-            json.dump(obj, outfile)
-            return True
+        json_file  = open('data.json', 'w')
+        json.dump(obj, json_file)
+        json_file.close()
+        return True
     except Exception as e:
         print(e)
         return False
@@ -56,6 +58,22 @@ def add_new_order(obj):
         return unique_id
     except:
         return False
+
+def order_status(order_id):
+    data = load_data()
+    if order_id in data["orders"].keys():
+        placedAt = datetime.fromtimestamp(data["orders"][order_id]["placedAt"])
+        now = datetime.now()
+        minutes = (now - placedAt).total_seconds()/60
+        if minutes < 15 :
+            return "Preparing"
+        elif minutes >=15 and minutes <=30:
+            return "Out for delivery"
+        else:
+            return "Delivered" 
+    else:
+        print("not present")
+
 
 if not "data.json" in os.listdir("./"):
     create_datafile()

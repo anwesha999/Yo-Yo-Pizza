@@ -106,7 +106,8 @@ export default {
                 amount:null,
                 address:null,
                 phoneNumber:null,
-                placedAt:null
+                placedAt:null,
+                orderId:null
             },
             menu:{
                 1:{
@@ -200,6 +201,22 @@ export default {
                 this.processUserResponse("")
             })
         },
+        getOrderstatus(){
+            var req = axios({
+                method: 'post',
+                url: "http://127.0.0.1:5000/get_order_status",
+                data: {
+                    orderId : this.requestData.orderId
+                },
+                headers : {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin' : '*'
+                }
+            });
+            Promise.resolve(req).then(status => {
+                this.processUserResponse(status.data)
+            })
+        },
         processUserResponse:function(message){
             message = message.trim()
             switch(this.nextState){
@@ -210,7 +227,9 @@ export default {
                         this.nextState="pizzaSelected"
                     }
                     else if (message == 2){
-                        this.nextState="orderStatus"
+                        var msg = "Please provide us your order ID"
+                        this.sendMessage(msg)
+                        this.nextState="order-status"
                     }
                     else{
                         this.sendMessage(this.incorrectResponse)
@@ -249,9 +268,20 @@ export default {
                 case "user-address":
                     this.requestData.address = message
                     this.requestData.placedAt = moment().unix()
-                    this.saveUserToDB()
-                    this.placeOrder()
+                    setTimeout(w => {
+                        this.saveUserToDB()
+                        this.placeOrder()
+                    },1000)
                     this.nextState = "finish"
+                    break;
+                case "order-status":
+                    this.requestData.orderId = message
+                    this.getOrderstatus()
+                    this.nextState = "status"
+                    break;
+                case "status":
+                    this.sendMessage("Your Order Status is : " + message)
+                    this.nextState = ""
                     break;
                 case "finish":
                     var msg = [
@@ -269,7 +299,7 @@ export default {
                     this.sendMessage("You order will be delivered shortly.")
                     break;
                 default:
-                    pass
+                    console.log("")
             }
         },
         sendMessage(msg){
